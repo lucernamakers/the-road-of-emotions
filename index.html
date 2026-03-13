@@ -113,6 +113,16 @@
         #program-bar { width: 95%; max-width: 600px; height: 45px; background: #fff; border: 2px dashed #ccc; border-radius: 10px; margin: 10px 0; display: flex; align-items: center; padding: 5px; gap: 5px; overflow-x: auto; }
         .cmd-icon { background: #eee; border: 1px solid #ccc; padding: 3px; border-radius: 4px; min-width: 25px; text-align: center; }
 
+        /* Botón Exportar */
+        .export-container { width: 100%; display: flex; justify-content: center; margin: 20px 0; }
+        .btn-export {
+            background: #2c3e50; color: white; border: none; padding: 12px 25px; 
+            border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 1em;
+            display: flex; align-items: center; gap: 10px; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-export:hover { background: #34495e; transform: translateY(-2px); }
+
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 6px solid #2ecc71; padding: 25px; border-radius: 20px; text-align: center; z-index: 100; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 280px; }
         
         #ranking-modal { border-color: #f1c40f; width: 320px; }
@@ -132,7 +142,6 @@
             <div class="lucerno-brand">
                 <div class="maker-text">Lucerno Steam Makers</div>
                 <div class="lucerno-icon-container">
-                    <!-- Logo Lucerno -->
                     <img src="uploaded:image_75df05.png" alt="Lucerno Icon" class="lucerno-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1087/1087815.png'">
                 </div>
             </div>
@@ -171,14 +180,12 @@
         </div>
 
         <div id="grid-container">
-            <!-- Tiles -->
             <div class="cell">🏫<div class="label">School</div></div><div class="cell"></div><div class="cell">😠<div class="label">Angry</div></div><div class="cell"></div>
             <div class="cell">😴<div class="label">Sleepy</div></div><div class="cell">🌳<div class="label">Park</div></div><div class="cell"></div><div class="cell">😍<div class="label">In Love</div></div>
             <div class="cell"></div><div class="cell">😱<div class="label">Scared</div></div><div class="cell">🥪<div class="label">Hungry</div></div><div class="cell"></div>
             <div class="cell">😄<div class="label">Happy</div></div><div class="cell"></div><div class="cell">🧘<div class="label">Quiet</div></div><div class="cell">😢<div class="label">Sad</div></div>
             
             <div id="p-lukas">
-                <!-- P-Lukas Original de la primera imagen cargada -->
                 <img src="uploaded:image_75d70c.png" alt="P-Lukas Original" class="robot-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712139.png'">
             </div>
         </div>
@@ -199,7 +206,12 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <div class="export-container">
+        <button class="btn-export" onclick="exportRanking()">
+            <span>📁</span> DOWNLOAD DATA (JSON)
+        </button>
+    </div>
+
     <div id="modal" class="modal">
         <h2>WELL DONE! 🌟</h2>
         <p id="win-text">Mission Complete!</p>
@@ -223,51 +235,49 @@
         import { getFirestore, doc, setDoc, getDocs, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Firebase Setup
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'plukas-emotions-v2';
 
-        window.playerName = "Player";
-        window.score = 0;
-        window.lives = 3;
-        let user = null;
-        let isAuthReady = false;
+        let currentUser = null;
 
+        // AUTH
         const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (e) { console.warn("Auth failed"); }
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
         };
-
         initAuth();
-        onAuthStateChanged(auth, (u) => { 
-            if(u) { user = u; isAuthReady = true; }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) currentUser = user;
         });
 
+        // FUNCIONES GLOBALES (Asignadas a window para que el HTML pueda verlas)
         window.startGame = () => {
             const input = document.getElementById('player-input').value.trim();
             if(!input) return;
             window.playerName = input;
             document.getElementById('display-name').innerText = `Hello, ${window.playerName}! 🤖`;
             document.getElementById('login-screen').style.display = 'none';
+            window.startAudio();
         };
 
         window.saveScore = async () => {
-            if (!isAuthReady || !user || !window.playerName) return;
+            if (!currentUser || !window.playerName) return;
             try {
-                const scoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', user.uid);
+                const scoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', currentUser.uid);
                 await setDoc(scoreRef, {
                     name: window.playerName,
                     score: window.score,
                     date: new Date().toISOString()
                 }, { merge: true });
-            } catch (e) {}
+            } catch (e) { console.error("Error saving score", e); }
         };
 
         window.showRanking = async () => {
@@ -291,6 +301,38 @@
             } catch (e) { list.innerHTML = "Error loading scores."; }
         };
 
+        // EXPORT DATA FUNCTION
+        window.exportRanking = async () => {
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ranking'));
+                const snapshot = await getDocs(q);
+                let dataToExport = [];
+                snapshot.forEach(doc => dataToExport.push(doc.data()));
+                
+                if(dataToExport.length === 0) {
+                    alert("No data available to export yet!");
+                    return;
+                }
+
+                // Sort by score for cleaner JSON
+                dataToExport.sort((a, b) => b.score - a.score);
+
+                const dataStr = JSON.stringify(dataToExport, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `P-Lukas_Ranking_${new Date().toISOString().split('T')[0]}.json`;
+
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                linkElement.remove();
+            } catch (e) {
+                console.error("Error exporting ranking", e);
+            }
+        };
+
+        // Escucha cambios en stats para guardar
         window.triggerUpdate = () => {
             document.getElementById('lives-display').innerText = "❤️".repeat(window.lives) + "🖤".repeat(3-window.lives);
             document.getElementById('score-display').innerText = window.score < 10 ? `0${window.score}` : window.score;
@@ -299,6 +341,11 @@
     </script>
 
     <script>
+        // Lógica de Juego Independiente
+        window.playerName = "Player";
+        window.score = 0;
+        window.lives = 3;
+
         const emotionData = [
             { name: 'Angry', emoji: '😠', x:2, y:0 }, { name: 'Sleepy', emoji: '😴', x:0, y:1 },
             { name: 'In Love', emoji: '😍', x:3, y:1 }, { name: 'Scared', emoji: '😱', x:1, y:2 },
@@ -313,9 +360,11 @@
             { t: "I love San Pablo! 👫❤️", e: "In Love" },
             { t: "It's time for a nap. 😴💤", e: "Sleepy" }
         ];
+        
         let completedEmotions = [], rx=0, ry=0, rot=0, cmds=[], active=false, currentM=null, matched=false, ctx;
 
-        function startAudio() { if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        window.startAudio = function() { if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        
         function sound(f, d, t='sine') {
             if(!ctx) return;
             const o = ctx.createOscillator(); const g = ctx.createGain();
@@ -343,7 +392,7 @@
             }
         }
 
-        function newMission() {
+        window.newMission = function() {
             if(active || window.lives <= 0) return;
             currentM = initialMissions[Math.floor(Math.random() * initialMissions.length)];
             document.getElementById('bocadillo').innerHTML = `<div>${currentM.t}</div>`;
@@ -351,9 +400,9 @@
             matched = false;
             document.getElementById('remote').classList.remove('unlocked');
             cmds = []; updateBar(); sound(600, 0.2);
-        }
+        };
 
-        function selectFeeling(feelingName) {
+        window.selectFeeling = function(feelingName) {
             if(!currentM || matched || window.lives <= 0) return;
             if(feelingName === currentM.e) {
                 matched = true; sound(800, 0.2);
@@ -363,18 +412,18 @@
                 window.lives--; sound(150, 0.5, 'sawtooth'); updateStats();
                 if(window.lives <= 0) document.getElementById('game-over-modal').style.display = 'block';
             }
-        }
+        };
 
-        function goHome() { if(active) return; rx=0; ry=0; rot=0; updateRobot(); }
-        function add(c) { if(active || !matched) return; cmds.push(c); sound(800, 0.05); updateBar(); }
-        function undo() { if(active) return; cmds.pop(); updateBar(); }
+        window.goHome = function() { if(active) return; rx=0; ry=0; rot=0; updateRobot(); };
+        window.add = function(c) { if(active || !matched) return; cmds.push(c); sound(800, 0.05); updateBar(); };
+        window.undo = function() { if(active) return; cmds.pop(); updateBar(); };
         
         function updateBar() {
             const m = {F:'↑', B:'↓', L:'↺', R:'↻'};
             document.getElementById('program-bar').innerHTML = cmds.map(c => `<div class="cmd-icon">${m[c]}</div>`).join('');
         }
 
-        async function run() {
+        window.run = async function() {
             if(active || !cmds.length || !matched) return;
             active = true;
             for(let c of cmds) {
@@ -399,10 +448,10 @@
                 document.getElementById('mission-btn').disabled = false;
             }
             updateStats(); active = false;
-        }
+        };
 
-        function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; document.getElementById('remote').classList.remove('unlocked'); matched = false; }
-        function restartGame() { window.lives = 3; window.score = 0; completedEmotions = []; rx = 0; ry = 0; rot = 0; document.getElementById('game-over-modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; updateStats(); renderLog(); updateRobot(); }
+        window.closeModal = function() { document.getElementById('modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; document.getElementById('remote').classList.remove('unlocked'); matched = false; };
+        window.restartGame = function() { window.lives = 3; window.score = 0; completedEmotions = []; rx = 0; ry = 0; rot = 0; document.getElementById('game-over-modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; updateStats(); renderLog(); updateRobot(); };
         function updateRobot() { const p = document.getElementById('p-lukas'); p.style.left = (rx*25)+'%'; p.style.top = (ry*25)+'%'; p.style.transform = `rotate(${rot}deg)`; }
         
         renderLog(); updateRobot();
