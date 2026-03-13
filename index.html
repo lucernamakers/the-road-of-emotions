@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P-Lukas: The Road of Emotions</title>
+    <style>
+        body { font-family: 'Comic Sans MS', sans-serif; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; overflow-x: hidden; }
+        h1 { color: #2c3e50; margin: 10px 0; font-size: 1.6em; text-align: center; }
+        
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+            z-index: 1000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: white; text-align: center;
+        }
+        .login-box { 
+            background: white; padding: 30px; border-radius: 30px; color: #333; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 85%; max-width: 400px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .lucerno-brand {
+            display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;
+        }
+        .maker-text { font-size: 0.9em; color: #95a5a6; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .lucerno-icon-container {
+            width: 100px; height: 100px; background: white; border: 4px solid #3498db;
+            border-radius: 50%; padding: 5px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .lucerno-icon { width: 90%; height: 90%; object-fit: contain; }
+
+        input[type="text"] { 
+            width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #dfe6e9; 
+            border-radius: 15px; font-size: 1.1em; text-align: center; transition: 0.3s;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus { border-color: #3498db; outline: none; }
+        
+        #game-header {
+            display: flex; align-items: center; justify-content: space-between; width: 95%; max-width: 700px; margin-bottom: 10px;
+            background: #ecf0f1; padding: 10px; border-radius: 15px; border: 3px solid #bdc3c7;
+        }
+        .stats-box { font-size: 1.4em; display: flex; align-items: center; gap: 5px; }
+        .player-name-tag { font-weight: bold; color: #3498db; margin-bottom: 5px; font-size: 0.9em; }
+        
+        .score-board {
+            background: #111; border: 4px solid #444; border-radius: 10px; padding: 5px 15px;
+            color: #ff3e3e; font-family: 'Courier New', Courier, monospace; font-weight: bold;
+            font-size: 2em; box-shadow: inset 0 0 15px #000; text-shadow: 0 0 8px #ff0000;
+            min-width: 60px; text-align: center; line-height: 1;
+        }
+
+        #header-challenge { display: flex; flex-direction: column; align-items: center; width: 95%; max-width: 600px; margin-bottom: 10px; }
+        .speech-bubble {
+            position: relative; background: #fff; border-radius: 20px; padding: 15px;
+            width: 100%; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 4px solid #333; font-size: 1.1em; font-weight: bold; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px;
+        }
+
+        #main-layout { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1000px; }
+        #mission-list-panel { width: 200px; background: white; border: 3px solid #3498db; border-radius: 15px; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .mission-item { font-size: 1em; padding: 8px; border: 2px solid #eee; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; cursor: pointer; }
+        .mission-item.done { text-decoration: line-through; color: #aaa; background: #f9f9f9; }
+
+        #grid-container { 
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); 
+            gap: 4px; width: 340px; height: 340px; background: #333; border: 8px solid #333; 
+            border-radius: 15px; position: relative;
+        }
+        .cell { background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 1.8em; position: relative; }
+        .label { font-size: 0.35em; font-weight: bold; color: #777; margin-top: 2px; }
+
+        #p-lukas { 
+            width: 25%; height: 25%; position: absolute; 
+            transition: all 0.5s ease-out; z-index: 10; 
+            display: flex; justify-content: center; align-items: center; 
+            pointer-events: none; 
+        }
+        .robot-img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+        }
+
+        #remote { background: #2c3e50; padding: 15px; border-radius: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0.4; pointer-events: none; transition: 0.3s; border: 4px solid #34495e; }
+        #remote.unlocked { opacity: 1; pointer-events: auto; }
+        .remote-title { color: #ecf0f1; font-weight: bold; font-size: 1.2em; letter-spacing: 2px; margin-bottom: 5px; }
+
+        .ctrl-grid { display: grid; grid-template-columns: repeat(3, 75px); grid-template-rows: repeat(3, 75px); gap: 10px; }
+        .btn-ctrl { 
+            border: none; border-radius: 12px; cursor: pointer; color: white; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 0.6em; font-weight: bold; text-align: center; gap: 2px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: 0.1s;
+        }
+        .btn-ctrl span { font-size: 1.8em; line-height: 1; }
+        
+        .up { background: #e67e22; grid-column: 2; grid-row: 1; }
+        .left { background: #9b59b6; grid-column: 1; grid-row: 2; }
+        .right { background: #3498db; grid-column: 3; grid-row: 2; }
+        .down { background: #f1c40f; grid-column: 2; grid-row: 3; color: #333; }
+        .go { background: white; color: #2ecc71; grid-column: 2; grid-row: 2; font-weight: bold; border: 4px solid #2ecc71; font-size: 1.1em; }
+
+        .extra-btns { display: flex; gap: 8px; width: 100%; margin-top: 5px; }
+        .btn-extra { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; justify-content: center; }
+        .btn-home { background: #1abc9c; color: white; }
+        .btn-erase { background: #bdc3c7; color: #333; }
+
+        #program-bar { width: 95%; max-width: 600px; height: 45px; background: #fff; border: 2px dashed #ccc; border-radius: 10px; margin: 10px 0; display: flex; align-items: center; padding: 5px; gap: 5px; overflow-x: auto; }
+        .cmd-icon { background: #eee; border: 1px solid #ccc; padding: 3px; border-radius: 4px; min-width: 25px; text-align: center; }
+
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 6px solid #2ecc71; padding: 25px; border-radius: 20px; text-align: center; z-index: 100; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 280px; }
+        
+        #ranking-modal { border-color: #f1c40f; width: 320px; }
+        .ranking-list { text-align: left; margin: 15px 0; max-height: 200px; overflow-y: auto; font-size: 0.95em; }
+
+        @media (max-width: 600px) {
+            #grid-container { width: 300px; height: 300px; }
+            #mission-list-panel { width: 95%; }
+            .ctrl-grid { grid-template-columns: repeat(3, 65px); grid-template-rows: repeat(3, 65px); }
+        }
+    </style>
+</head>
+<body onclick="startAudio()">
+
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="lucerno-brand">
+                <div class="maker-text">Lucerno Steam Makers</div>
+                <div class="lucerno-icon-container">
+                    <!-- Logo Lucerno -->
+                    <img src="uploaded:image_75df05.png" alt="Lucerno Icon" class="lucerno-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1087/1087815.png'">
+                </div>
+            </div>
+            <h2 style="margin:0 0 10px 0; color:#2c3e50; font-size: 1.4em;">The Road of Emotions 🌈</h2>
+            <p style="margin:0; color: #7f8c8d; font-size: 0.95em;">P-Lukas is lost in San Pablo.<br>What is your name, explorer?</p>
+            <input type="text" id="player-input" placeholder="Enter your name..." maxlength="15">
+            <button class="btn-mission" style="width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 0 #2980b9;" onclick="startGame()">START MISSION 🚀</button>
+        </div>
+    </div>
+
+    <h1>🤖 P-Lukas: The Road of Emotions</h1>
+    <div class="player-name-tag" id="display-name">Guest Player</div>
+
+    <div id="game-header">
+        <div class="stats-box" style="color:#e74c3c" id="lives-display">❤️❤️❤️</div>
+        <div style="display:flex; gap:5px;">
+            <button class="btn-mission" id="mission-btn" style="background:#3498db; color:white; border:none; padding: 10px 15px; border-radius: 10px; cursor:pointer; font-weight:bold; box-shadow:0 4px 0 #2980b9;" onclick="newMission()">✨ MISSION</button>
+            <button class="btn-mission" style="background:#f1c40f; color:#333; border:none; padding: 10px 15px; border-radius: 10px; cursor:pointer; font-weight:bold; box-shadow: 0 4px 0 #d4ac0d;" onclick="showRanking()">🏆 RANK</button>
+        </div>
+        <div class="score-board" id="score-display">00</div>
+    </div>
+
+    <div id="header-challenge">
+        <div class="speech-bubble" id="bocadillo">
+            <div>1. Click "MISSION"</div>
+            <div>2. Select the Feeling!</div>
+        </div>
+    </div>
+
+    <div id="program-bar"></div>
+
+    <div id="main-layout">
+        <div id="mission-list-panel">
+            <div style="font-weight: bold; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 5px;">Feelings List:</div>
+            <div id="log-content"></div>
+        </div>
+
+        <div id="grid-container">
+            <!-- Tiles -->
+            <div class="cell">🏫<div class="label">School</div></div><div class="cell"></div><div class="cell">😠<div class="label">Angry</div></div><div class="cell"></div>
+            <div class="cell">😴<div class="label">Sleepy</div></div><div class="cell">🌳<div class="label">Park</div></div><div class="cell"></div><div class="cell">😍<div class="label">In Love</div></div>
+            <div class="cell"></div><div class="cell">😱<div class="label">Scared</div></div><div class="cell">🥪<div class="label">Hungry</div></div><div class="cell"></div>
+            <div class="cell">😄<div class="label">Happy</div></div><div class="cell"></div><div class="cell">🧘<div class="label">Quiet</div></div><div class="cell">😢<div class="label">Sad</div></div>
+            
+            <div id="p-lukas">
+                <!-- P-Lukas Original de la primera imagen cargada -->
+                <img src="uploaded:image_75d70c.png" alt="P-Lukas Original" class="robot-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712139.png'">
+            </div>
+        </div>
+
+        <div id="remote">
+            <div class="remote-title">CODE</div>
+            <div class="ctrl-grid">
+                <button class="btn-ctrl up" onclick="add('F')"><span>↑</span>Forward</button>
+                <button class="btn-ctrl left" onclick="add('L')"><span>↺</span>Left</button>
+                <button class="btn-ctrl go" onclick="run()">GO</button>
+                <button class="btn-ctrl right" onclick="add('R')"><span>↻</span>Right</button>
+                <button class="btn-ctrl down" onclick="add('B')"><span>↓</span>Back</button>
+            </div>
+            <div class="extra-btns">
+                <button class="btn-extra btn-home" onclick="goHome()">HOME 🏠</button>
+                <button class="btn-extra btn-erase" onclick="undo()">ERASE 🧼</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal" class="modal">
+        <h2>WELL DONE! 🌟</h2>
+        <p id="win-text">Mission Complete!</p>
+        <button onclick="closeModal()" style="background:#2ecc71; color:white; border:none; padding: 10px 20px; border-radius: 10px; cursor:pointer; font-weight:bold;">CONTINUE</button>
+    </div>
+
+    <div id="game-over-modal" class="modal" style="border-color:#e74c3c">
+        <h2 style="color:#e74c3c">GAME OVER 💔</h2>
+        <p>P-Lukas is lost!</p>
+        <button onclick="restartGame()" style="background:#e74c3c; color:white; border:none; padding: 10px 20px; border-radius: 10px; cursor:pointer; font-weight:bold;">RETRY</button>
+    </div>
+
+    <div id="ranking-modal" class="modal">
+        <h2>🏆 Top Students</h2>
+        <div class="ranking-list" id="rank-list">Loading scores...</div>
+        <button onclick="document.getElementById('ranking-modal').style.display='none'" style="background:#95a5a6; color:white; border:none; padding: 8px 15px; border-radius: 8px; cursor:pointer;">CLOSE</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDocs, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'plukas-emotions-v2';
+
+        window.playerName = "Player";
+        window.score = 0;
+        window.lives = 3;
+        let user = null;
+        let isAuthReady = false;
+
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) { console.warn("Auth failed"); }
+        };
+
+        initAuth();
+        onAuthStateChanged(auth, (u) => { 
+            if(u) { user = u; isAuthReady = true; }
+        });
+
+        window.startGame = () => {
+            const input = document.getElementById('player-input').value.trim();
+            if(!input) return;
+            window.playerName = input;
+            document.getElementById('display-name').innerText = `Hello, ${window.playerName}! 🤖`;
+            document.getElementById('login-screen').style.display = 'none';
+        };
+
+        window.saveScore = async () => {
+            if (!isAuthReady || !user || !window.playerName) return;
+            try {
+                const scoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', user.uid);
+                await setDoc(scoreRef, {
+                    name: window.playerName,
+                    score: window.score,
+                    date: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {}
+        };
+
+        window.showRanking = async () => {
+            const modal = document.getElementById('ranking-modal');
+            const list = document.getElementById('rank-list');
+            modal.style.display = 'block';
+            list.innerHTML = "Connecting...";
+            
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ranking'));
+                const snapshot = await getDocs(q);
+                let scores = [];
+                snapshot.forEach(doc => scores.push(doc.data()));
+                scores.sort((a, b) => b.score - a.score);
+                list.innerHTML = scores.length ? scores.slice(0, 10).map((s, i) => `
+                    <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;">
+                        <span>${i+1}. ${s.name}</span>
+                        <span style="font-weight:bold;">${s.score} pts</span>
+                    </div>
+                `).join('') : "No scores yet!";
+            } catch (e) { list.innerHTML = "Error loading scores."; }
+        };
+
+        window.triggerUpdate = () => {
+            document.getElementById('lives-display').innerText = "❤️".repeat(window.lives) + "🖤".repeat(3-window.lives);
+            document.getElementById('score-display').innerText = window.score < 10 ? `0${window.score}` : window.score;
+            if (window.score > 0) window.saveScore(); 
+        };
+    </script>
+
+    <script>
+        const emotionData = [
+            { name: 'Angry', emoji: '😠', x:2, y:0 }, { name: 'Sleepy', emoji: '😴', x:0, y:1 },
+            { name: 'In Love', emoji: '😍', x:3, y:1 }, { name: 'Scared', emoji: '😱', x:1, y:2 },
+            { name: 'Hungry', emoji: '🥪', x:2, y:2 }, { name: 'Happy', emoji: '😄', x:0, y:3 },
+            { name: 'Quiet', emoji: '🧘', x:2, y:3 }, { name: 'Sad', emoji: '😢', x:3, y:3 }
+        ];
+        const initialMissions = [
+            { t: "My rocket is broken. 🚀💔", e: "Angry" },
+            { t: "I miss my dog 'Lili'. 🐶😢", e: "Sad" },
+            { t: "I have Physical Education! 🏀👟", e: "Happy" },
+            { t: "A spider on my table! 🕷️", e: "Scared" },
+            { t: "I love San Pablo! 👫❤️", e: "In Love" },
+            { t: "It's time for a nap. 😴💤", e: "Sleepy" }
+        ];
+        let completedEmotions = [], rx=0, ry=0, rot=0, cmds=[], active=false, currentM=null, matched=false, ctx;
+
+        function startAudio() { if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function sound(f, d, t='sine') {
+            if(!ctx) return;
+            const o = ctx.createOscillator(); const g = ctx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, ctx.currentTime);
+            o.connect(g); g.connect(ctx.destination);
+            g.gain.setValueAtTime(0.05, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + d);
+            o.start(); o.stop(ctx.currentTime + d);
+        }
+
+        function renderLog() {
+            document.getElementById('log-content').innerHTML = emotionData.map(emo => `
+                <div class="mission-item ${completedEmotions.includes(emo.name) ? 'done' : ''}" 
+                     onclick="selectFeeling('${emo.name}')">
+                    <span>${emo.emoji} ${emo.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            if(window.triggerUpdate) window.triggerUpdate();
+            else {
+                document.getElementById('lives-display').innerText = "❤️".repeat(window.lives) + "🖤".repeat(3-window.lives);
+                document.getElementById('score-display').innerText = window.score < 10 ? `0${window.score}` : window.score;
+            }
+        }
+
+        function newMission() {
+            if(active || window.lives <= 0) return;
+            currentM = initialMissions[Math.floor(Math.random() * initialMissions.length)];
+            document.getElementById('bocadillo').innerHTML = `<div>${currentM.t}</div>`;
+            document.getElementById('mission-btn').disabled = true;
+            matched = false;
+            document.getElementById('remote').classList.remove('unlocked');
+            cmds = []; updateBar(); sound(600, 0.2);
+        }
+
+        function selectFeeling(feelingName) {
+            if(!currentM || matched || window.lives <= 0) return;
+            if(feelingName === currentM.e) {
+                matched = true; sound(800, 0.2);
+                document.getElementById('remote').classList.add('unlocked');
+                document.getElementById('bocadillo').innerHTML = `<div>GREAT! It's <b>${feelingName}</b>. Program P-Lukas!</div>`;
+            } else {
+                window.lives--; sound(150, 0.5, 'sawtooth'); updateStats();
+                if(window.lives <= 0) document.getElementById('game-over-modal').style.display = 'block';
+            }
+        }
+
+        function goHome() { if(active) return; rx=0; ry=0; rot=0; updateRobot(); }
+        function add(c) { if(active || !matched) return; cmds.push(c); sound(800, 0.05); updateBar(); }
+        function undo() { if(active) return; cmds.pop(); updateBar(); }
+        
+        function updateBar() {
+            const m = {F:'↑', B:'↓', L:'↺', R:'↻'};
+            document.getElementById('program-bar').innerHTML = cmds.map(c => `<div class="cmd-icon">${m[c]}</div>`).join('');
+        }
+
+        async function run() {
+            if(active || !cmds.length || !matched) return;
+            active = true;
+            for(let c of cmds) {
+                await new Promise(r => setTimeout(r, 600));
+                let ox = rx, oy = ry;
+                if(c === 'L') rot -= 90; else if(c === 'R') rot += 90;
+                else {
+                    let a = (rot % 360 + 360) % 360; let s = (c === 'F') ? 1 : -1;
+                    if(a === 0) ry -= s; else if(a === 90) rx += s; else if(a === 180) ry += s; else if(a === 270) rx -= s;
+                    if(rx<0||rx>3||ry<0||ry>3) { rx=ox; ry=oy; } else sound(1000, 0.1);
+                }
+                updateRobot();
+            }
+            const emoInfo = emotionData.find(e => e.name === currentM.e);
+            if(rx === emoInfo.x && ry === emoInfo.y) {
+                window.score++; if(!completedEmotions.includes(currentM.e)) completedEmotions.push(currentM.e);
+                document.getElementById('modal').style.display = 'block';
+                renderLog();
+            } else {
+                window.lives--; sound(150, 0.6, 'sawtooth');
+                if(window.lives <= 0) document.getElementById('game-over-modal').style.display = 'block';
+                document.getElementById('mission-btn').disabled = false;
+            }
+            updateStats(); active = false;
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; document.getElementById('remote').classList.remove('unlocked'); matched = false; }
+        function restartGame() { window.lives = 3; window.score = 0; completedEmotions = []; rx = 0; ry = 0; rot = 0; document.getElementById('game-over-modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; updateStats(); renderLog(); updateRobot(); }
+        function updateRobot() { const p = document.getElementById('p-lukas'); p.style.left = (rx*25)+'%'; p.style.top = (ry*25)+'%'; p.style.transform = `rotate(${rot}deg)`; }
+        
+        renderLog(); updateRobot();
+    </script>
+</body>
+</html>
