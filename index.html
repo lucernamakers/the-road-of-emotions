@@ -55,7 +55,7 @@
         #header-challenge { display: flex; flex-direction: column; align-items: center; width: 95%; max-width: 600px; margin-bottom: 10px; }
         .speech-bubble {
             position: relative; background: #fff; border-radius: 20px; padding: 15px;
-            width: 100%; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; min-height: 65px; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border: 4px solid #333; font-size: 1.1em; font-weight: bold; text-align: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px;
         }
@@ -113,20 +113,37 @@
         #program-bar { width: 95%; max-width: 600px; height: 45px; background: #fff; border: 2px dashed #ccc; border-radius: 10px; margin: 10px 0; display: flex; align-items: center; padding: 5px; gap: 5px; overflow-x: auto; }
         .cmd-icon { background: #eee; border: 1px solid #ccc; padding: 3px; border-radius: 4px; min-width: 25px; text-align: center; }
 
-        /* Botón Exportar */
-        .export-container { width: 100%; display: flex; justify-content: center; margin: 20px 0; }
-        .btn-export {
-            background: #2c3e50; color: white; border: none; padding: 12px 25px; 
-            border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 1em;
-            display: flex; align-items: center; gap: 10px; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .btn-export:hover { background: #34495e; transform: translateY(-2px); }
-
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 6px solid #2ecc71; padding: 25px; border-radius: 20px; text-align: center; z-index: 100; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 280px; }
         
         #ranking-modal { border-color: #f1c40f; width: 320px; }
         .ranking-list { text-align: left; margin: 15px 0; max-height: 200px; overflow-y: auto; font-size: 0.95em; }
+
+        /* Estilo para botón de IA */
+        .btn-ai-sparkle {
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96) !important;
+            color: white !important;
+            animation: pulse-ai 2s infinite alternate;
+        }
+        @keyframes pulse-ai {
+            0% { box-shadow: 0 4px 6px rgba(63, 43, 150, 0.4); }
+            100% { box-shadow: 0 4px 15px rgba(168, 192, 255, 0.8), 0 0 5px #a8c0ff; }
+        }
+
+        /* Spinner para carga de IA */
+        .loader-ai {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3f2b96;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         @media (max-width: 600px) {
             #grid-container { width: 300px; height: 300px; }
@@ -142,7 +159,8 @@
             <div class="lucerno-brand">
                 <div class="maker-text">Lucerno Steam Makers</div>
                 <div class="lucerno-icon-container">
-                    <img src="uploaded:image_75df05.png" alt="Lucerno Icon" class="lucerno-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1087/1087815.png'">
+                    <!-- Logo P-Lukas -->
+                    <img src="uploaded:image_8fba87.png" alt="P-Lukas Logo" class="lucerno-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712139.png'">
                 </div>
             </div>
             <h2 style="margin:0 0 10px 0; color:#2c3e50; font-size: 1.4em;">The Road of Emotions 🌈</h2>
@@ -157,17 +175,19 @@
 
     <div id="game-header">
         <div class="stats-box" style="color:#e74c3c" id="lives-display">❤️❤️❤️</div>
-        <div style="display:flex; gap:5px;">
-            <button class="btn-mission" id="mission-btn" style="background:#3498db; color:white; border:none; padding: 10px 15px; border-radius: 10px; cursor:pointer; font-weight:bold; box-shadow:0 4px 0 #2980b9;" onclick="newMission()">✨ MISSION</button>
-            <button class="btn-mission" style="background:#f1c40f; color:#333; border:none; padding: 10px 15px; border-radius: 10px; cursor:pointer; font-weight:bold; box-shadow: 0 4px 0 #d4ac0d;" onclick="showRanking()">🏆 RANK</button>
+        <div style="display:flex; gap:5px; flex-wrap: wrap; justify-content: center;">
+            <button class="btn-mission" id="mission-btn" style="background:#3498db; color:white; border:none; padding: 10px 12px; border-radius: 10px; cursor:pointer; font-weight:bold; box-shadow:0 4px 0 #2980b9;" onclick="newMission()">✨ MISSION</button>
+            <button class="btn-mission btn-ai-sparkle" id="ai-mission-btn" style="border:none; padding: 10px 12px; border-radius: 10px; cursor:pointer; font-weight:bold; color: white;" onclick="newAiMission()">✨ AI MISSION</button>
+            <button class="btn-mission" style="background:#f1c40f; color:#333; border:none; padding: 10px 12px; border-radius: 10px; cursor:pointer; font-weight:bold; box-shadow: 0 4px 0 #d4ac0d;" onclick="showRanking()">🏆 RANK</button>
         </div>
         <div class="score-board" id="score-display">00</div>
     </div>
 
     <div id="header-challenge">
-        <div class="speech-bubble" id="bocadillo">
-            <div>1. Click "MISSION"</div>
+        <div class="speech-bubble" id="bocadillo" style="cursor: pointer;" onclick="explainCurrentEmotion()">
+            <div>1. Click "MISSION" or "✨ AI MISSION"</div>
             <div>2. Select the Feeling!</div>
+            <div style="font-size:0.7em; color:#7f8c8d; margin-top:5px; font-weight:normal;">💡 Tip: Click me to ask P-Lukas for advice!</div>
         </div>
     </div>
 
@@ -180,12 +200,14 @@
         </div>
 
         <div id="grid-container">
+            <!-- Tiles -->
             <div class="cell">🏫<div class="label">School</div></div><div class="cell"></div><div class="cell">😠<div class="label">Angry</div></div><div class="cell"></div>
             <div class="cell">😴<div class="label">Sleepy</div></div><div class="cell">🌳<div class="label">Park</div></div><div class="cell"></div><div class="cell">😍<div class="label">In Love</div></div>
             <div class="cell"></div><div class="cell">😱<div class="label">Scared</div></div><div class="cell">🥪<div class="label">Hungry</div></div><div class="cell"></div>
             <div class="cell">😄<div class="label">Happy</div></div><div class="cell"></div><div class="cell">🧘<div class="label">Quiet</div></div><div class="cell">😢<div class="label">Sad</div></div>
             
             <div id="p-lukas">
+                <!-- P-Lukas Original de la primera imagen cargada -->
                 <img src="uploaded:image_75d70c.png" alt="P-Lukas Original" class="robot-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712139.png'">
             </div>
         </div>
@@ -206,16 +228,12 @@
         </div>
     </div>
 
-    <div class="export-container">
-        <button class="btn-export" onclick="exportRanking()">
-            <span>📁</span> DOWNLOAD DATA (JSON)
-        </button>
-    </div>
-
+    <!-- Modals -->
     <div id="modal" class="modal">
         <h2>WELL DONE! 🌟</h2>
         <p id="win-text">Mission Complete!</p>
-        <button onclick="closeModal()" style="background:#2ecc71; color:white; border:none; padding: 10px 20px; border-radius: 10px; cursor:pointer; font-weight:bold;">CONTINUE</button>
+        <button onclick="explainVictoryEmotion()" style="background:#3f2b96; color:white; border:none; padding: 10px 15px; border-radius: 10px; cursor:pointer; font-weight:bold; margin-bottom: 10px; display: block; width: 100%;">✨ P-LUKAS EXPLAINS</button>
+        <button onclick="closeModal()" style="background:#2ecc71; color:white; border:none; padding: 10px 20px; border-radius: 10px; cursor:pointer; font-weight:bold; display: block; width: 100%;">CONTINUE</button>
     </div>
 
     <div id="game-over-modal" class="modal" style="border-color:#e74c3c">
@@ -230,60 +248,67 @@
         <button onclick="document.getElementById('ranking-modal').style.display='none'" style="background:#95a5a6; color:white; border:none; padding: 8px 15px; border-radius: 8px; cursor:pointer;">CLOSE</button>
     </div>
 
+    <!-- Firebase SDK Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDocs, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase Setup
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'plukas-emotions-v2';
+        let user = null;
+        let isAuthReady = false;
+        let db = null;
+        let appId = typeof __app_id !== 'undefined' ? __app_id : 'plukas-emotions-v2';
 
-        let currentUser = null;
+        // Intentar inicializar Firebase de forma segura si las variables del entorno están presentes
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
 
-        // AUTH
-        const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) { console.warn("Auth failed"); }
+                };
+
+                initAuth();
+                onAuthStateChanged(auth, (u) => { 
+                    if(u) { user = u; isAuthReady = true; }
+                });
             }
-        };
-        initAuth();
+        } catch (error) {
+            console.warn("Firebase no inicializado (Ejecutándose en Modo Local)");
+        }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) currentUser = user;
-        });
-
-        // FUNCIONES GLOBALES (Asignadas a window para que el HTML pueda verlas)
-        window.startGame = () => {
-            const input = document.getElementById('player-input').value.trim();
-            if(!input) return;
-            window.playerName = input;
-            document.getElementById('display-name').innerText = `Hello, ${window.playerName}! 🤖`;
-            document.getElementById('login-screen').style.display = 'none';
-            window.startAudio();
-        };
-
+        // Registrar funciones de guardado globales para Firebase
         window.saveScore = async () => {
-            if (!currentUser || !window.playerName) return;
+            if (!isAuthReady || !user || !window.playerName || !db) return;
             try {
-                const scoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', currentUser.uid);
+                const scoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', user.uid);
                 await setDoc(scoreRef, {
                     name: window.playerName,
                     score: window.score,
                     date: new Date().toISOString()
                 }, { merge: true });
-            } catch (e) { console.error("Error saving score", e); }
+            } catch (e) {}
         };
 
         window.showRanking = async () => {
             const modal = document.getElementById('ranking-modal');
             const list = document.getElementById('rank-list');
             modal.style.display = 'block';
+            
+            if (!db) {
+                list.innerHTML = "Not available in local mode.";
+                return;
+            }
+
             list.innerHTML = "Connecting...";
             
             try {
@@ -301,38 +326,6 @@
             } catch (e) { list.innerHTML = "Error loading scores."; }
         };
 
-        // EXPORT DATA FUNCTION
-        window.exportRanking = async () => {
-            try {
-                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ranking'));
-                const snapshot = await getDocs(q);
-                let dataToExport = [];
-                snapshot.forEach(doc => dataToExport.push(doc.data()));
-                
-                if(dataToExport.length === 0) {
-                    alert("No data available to export yet!");
-                    return;
-                }
-
-                // Sort by score for cleaner JSON
-                dataToExport.sort((a, b) => b.score - a.score);
-
-                const dataStr = JSON.stringify(dataToExport, null, 2);
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                
-                const exportFileDefaultName = `P-Lukas_Ranking_${new Date().toISOString().split('T')[0]}.json`;
-
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-                linkElement.remove();
-            } catch (e) {
-                console.error("Error exporting ranking", e);
-            }
-        };
-
-        // Escucha cambios en stats para guardar
         window.triggerUpdate = () => {
             document.getElementById('lives-display').innerText = "❤️".repeat(window.lives) + "🖤".repeat(3-window.lives);
             document.getElementById('score-display').innerText = window.score < 10 ? `0${window.score}` : window.score;
@@ -340,11 +333,24 @@
         };
     </script>
 
+    <!-- Game Logic & UI Core (Siempre se ejecuta independientemente del estado de Firebase) -->
     <script>
-        // Lógica de Juego Independiente
+        // Variables globales del juego inicializadas de forma segura
         window.playerName = "Player";
         window.score = 0;
         window.lives = 3;
+
+        // FUNCIÓN CLAVE: Ahora se carga aquí para que siempre esté activa de inmediato
+        window.startGame = () => {
+            const input = document.getElementById('player-input').value.trim();
+            window.playerName = input ? input : "Explorer";
+            document.getElementById('display-name').innerText = `Hello, ${window.playerName}! 🤖`;
+            document.getElementById('login-screen').style.display = 'none';
+            updateStats();
+        };
+
+        const apiKey = ""; // Se inyecta en ejecución
+        const modelName = "gemini-2.5-flash-preview-09-2025";
 
         const emotionData = [
             { name: 'Angry', emoji: '😠', x:2, y:0 }, { name: 'Sleepy', emoji: '😴', x:0, y:1 },
@@ -360,11 +366,9 @@
             { t: "I love San Pablo! 👫❤️", e: "In Love" },
             { t: "It's time for a nap. 😴💤", e: "Sleepy" }
         ];
-        
         let completedEmotions = [], rx=0, ry=0, rot=0, cmds=[], active=false, currentM=null, matched=false, ctx;
 
-        window.startAudio = function() { if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-        
+        function startAudio() { if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); }
         function sound(f, d, t='sine') {
             if(!ctx) return;
             const o = ctx.createOscillator(); const g = ctx.createGain();
@@ -385,45 +389,208 @@
         }
 
         function updateStats() {
-            if(window.triggerUpdate) window.triggerUpdate();
-            else {
+            if(window.triggerUpdate) {
+                window.triggerUpdate();
+            } else {
                 document.getElementById('lives-display').innerText = "❤️".repeat(window.lives) + "🖤".repeat(3-window.lives);
                 document.getElementById('score-display').innerText = window.score < 10 ? `0${window.score}` : window.score;
             }
         }
 
-        window.newMission = function() {
+        async function fetchGeminiWithBackoff(url, options, retries = 5, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchGeminiWithBackoff(url, options, retries - 1, delay * 2);
+                }
+                throw error;
+            }
+        }
+
+        async function newAiMission() {
+            if(active || window.lives <= 0) return;
+            
+            const aiButton = document.getElementById('ai-mission-btn');
+            const normalButton = document.getElementById('mission-btn');
+            const bubble = document.getElementById('bocadillo');
+            
+            aiButton.disabled = true;
+            normalButton.disabled = true;
+            bubble.innerHTML = `<div><span class="loader-ai"></span><br>Generating ✨ AI Mission...</div>`;
+            sound(600, 0.2);
+
+            try {
+                const emotionListStr = emotionData.map(e => `'${e.name}'`).join(', ');
+                const payload = {
+                    contents: [{
+                        parts: [{
+                            text: `Generate a short, extremely creative, child-friendly scenario (1 sentence, max 12 words) suited for primary school kids that strongly represents one of these exact emotions: ${emotionListStr}. Return ONLY a JSON object. Ensure the keys are exact. "text" is the scenario in English including 1 or 2 matching emojis, and "emotion" is the exact emotion selected from the list.`
+                        }]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                text: { type: "STRING" },
+                                emotion: { type: "STRING" }
+                            },
+                            required: ["text", "emotion"]
+                        }
+                    }
+                };
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                const data = await fetchGeminiWithBackoff(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const contentText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!contentText) throw new Error("Empty response");
+
+                const result = JSON.parse(contentText);
+                const validEmotion = emotionData.some(e => e.name.toLowerCase() === result.emotion.toLowerCase());
+                
+                if (validEmotion) {
+                    const normalizedEmotion = emotionData.find(e => e.name.toLowerCase() === result.emotion.toLowerCase()).name;
+                    currentM = { t: result.text, e: normalizedEmotion };
+                    bubble.innerHTML = `<div>✨ <b>AI Mission:</b> "${currentM.t}"</div>`;
+                    matched = false;
+                    document.getElementById('remote').classList.remove('unlocked');
+                    cmds = []; 
+                    updateBar(); 
+                    sound(800, 0.15);
+                } else {
+                    throw new Error("Invalid emotion generated");
+                }
+            } catch (error) {
+                console.error("AI Generation failed, falling back", error);
+                currentM = initialMissions[Math.floor(Math.random() * initialMissions.length)];
+                bubble.innerHTML = `<div>${currentM.t} <br><small style="color:#e74c3c">(AI offline, fallback active)</small></div>`;
+                matched = false;
+                document.getElementById('remote').classList.remove('unlocked');
+                cmds = []; 
+                updateBar();
+            } finally {
+                aiButton.disabled = false;
+                normalButton.disabled = false;
+            }
+        }
+
+        async function explainCurrentEmotion() {
+            const bubble = document.getElementById('bocadillo');
+            let feelingToExplain = "";
+            let contextText = "";
+            
+            if (currentM) {
+                feelingToExplain = currentM.e;
+                contextText = currentM.t;
+            } else {
+                bubble.innerHTML = `<div>First, start a mission to ask P-Lukas about feelings! 🧠✨</div>`;
+                return;
+            }
+
+            const originalContent = bubble.innerHTML;
+            bubble.innerHTML = `<div><span class="loader-ai"></span><br>P-Lukas is thinking... 🧠</div>`;
+            
+            try {
+                const prompt = `You are P-Lukas, a smart, friendly, and very encouraging school helper robot. Keep your answer under 45 words. 
+                Explain to a 7-year-old child why someone might feel "${feelingToExplain}" when "${contextText}".
+                Give a super short, fun, practical robotic mindfulness tip or breathing trick to cope with or enjoy this emotion. Answer in friendly English.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }]
+                };
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                const data = await fetchGeminiWithBackoff(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const robotText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (robotText) {
+                    bubble.innerHTML = `<div>🤖 <b>P-Lukas:</b> "${robotText}" <div style="font-size:0.7em; color:#7f8c8d; margin-top:5px;">Click to restore original prompt</div></div>`;
+                    bubble.onclick = () => {
+                        bubble.innerHTML = originalContent;
+                        bubble.onclick = explainCurrentEmotion;
+                    };
+                } else {
+                    bubble.innerHTML = originalContent;
+                }
+            } catch (error) {
+                bubble.innerHTML = `<div>🤖 *BEEP BOOP* I'm a bit busy now, but remember: taking 3 deep breaths always helps! 💨</div>`;
+                setTimeout(() => { bubble.innerHTML = originalContent; }, 5000);
+            }
+        }
+
+        async function explainVictoryEmotion() {
+            if (!currentM) return;
+            const winText = document.getElementById('win-text');
+            const prevText = winText.innerHTML;
+            winText.innerHTML = `<span class="loader-ai"></span> Connecting to P-Lukas...`;
+
+            try {
+                const prompt = `You are P-Lukas, a friendly robot coach. Congratulate ${window.playerName || "Explorer"} for successfully navigating to "${currentM.e}"! Tell them in one fun sentence (max 18 words) why coding and identifying emotions is super cool. Answer in friendly English.`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }]
+                };
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                const data = await fetchGeminiWithBackoff(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const robotText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (robotText) {
+                    winText.innerHTML = `🤖 "<b>${robotText}</b>"`;
+                } else {
+                    winText.innerHTML = prevText;
+                }
+            } catch (e) {
+                winText.innerHTML = `🌟 Congratulations! P-Lukas is super proud of your coding skills!`;
+            }
+        }
+
+        function newMission() {
             if(active || window.lives <= 0) return;
             currentM = initialMissions[Math.floor(Math.random() * initialMissions.length)];
-            document.getElementById('bocadillo').innerHTML = `<div>${currentM.t}</div>`;
+            document.getElementById('bocadillo').innerHTML = `<div>${currentM.t}</div><div style="font-size:0.7em; color:#7f8c8d; margin-top:5px; font-weight:normal;">💡 Tip: Click me to ask P-Lukas for advice!</div>`;
             document.getElementById('mission-btn').disabled = true;
             matched = false;
             document.getElementById('remote').classList.remove('unlocked');
             cmds = []; updateBar(); sound(600, 0.2);
-        };
+        }
 
-        window.selectFeeling = function(feelingName) {
+        function selectFeeling(feelingName) {
             if(!currentM || matched || window.lives <= 0) return;
             if(feelingName === currentM.e) {
                 matched = true; sound(800, 0.2);
                 document.getElementById('remote').classList.add('unlocked');
-                document.getElementById('bocadillo').innerHTML = `<div>GREAT! It's <b>${feelingName}</b>. Program P-Lukas!</div>`;
+                document.getElementById('bocadillo').innerHTML = `<div>GREAT! It's <b>${feelingName}</b>. Program P-Lukas!<br><span style="font-size:0.8em; color:#2ecc71;">💡 Click me to let P-Lukas explain why we feel ${feelingName}!</span></div>`;
             } else {
                 window.lives--; sound(150, 0.5, 'sawtooth'); updateStats();
                 if(window.lives <= 0) document.getElementById('game-over-modal').style.display = 'block';
             }
-        };
+        }
 
-        window.goHome = function() { if(active) return; rx=0; ry=0; rot=0; updateRobot(); };
-        window.add = function(c) { if(active || !matched) return; cmds.push(c); sound(800, 0.05); updateBar(); };
-        window.undo = function() { if(active) return; cmds.pop(); updateBar(); };
+        function goHome() { if(active) return; rx=0; ry=0; rot=0; updateRobot(); }
+        function add(c) { if(active || !matched) return; cmds.push(c); sound(800, 0.05); updateBar(); }
+        function undo() { if(active) return; cmds.pop(); updateBar(); }
         
         function updateBar() {
             const m = {F:'↑', B:'↓', L:'↺', R:'↻'};
             document.getElementById('program-bar').innerHTML = cmds.map(c => `<div class="cmd-icon">${m[c]}</div>`).join('');
         }
 
-        window.run = async function() {
+        async function run() {
             if(active || !cmds.length || !matched) return;
             active = true;
             for(let c of cmds) {
@@ -440,6 +607,7 @@
             const emoInfo = emotionData.find(e => e.name === currentM.e);
             if(rx === emoInfo.x && ry === emoInfo.y) {
                 window.score++; if(!completedEmotions.includes(currentM.e)) completedEmotions.push(currentM.e);
+                document.getElementById('win-text').innerHTML = `Mission Complete! You successfully guided P-Lukas to ${currentM.e}.`;
                 document.getElementById('modal').style.display = 'block';
                 renderLog();
             } else {
@@ -448,10 +616,10 @@
                 document.getElementById('mission-btn').disabled = false;
             }
             updateStats(); active = false;
-        };
+        }
 
-        window.closeModal = function() { document.getElementById('modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; document.getElementById('remote').classList.remove('unlocked'); matched = false; };
-        window.restartGame = function() { window.lives = 3; window.score = 0; completedEmotions = []; rx = 0; ry = 0; rot = 0; document.getElementById('game-over-modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; updateStats(); renderLog(); updateRobot(); };
+        function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; document.getElementById('remote').classList.remove('unlocked'); matched = false; }
+        function restartGame() { window.lives = 3; window.score = 0; completedEmotions = []; rx = 0; ry = 0; rot = 0; document.getElementById('game-over-modal').style.display = 'none'; document.getElementById('mission-btn').disabled = false; updateStats(); renderLog(); updateRobot(); }
         function updateRobot() { const p = document.getElementById('p-lukas'); p.style.left = (rx*25)+'%'; p.style.top = (ry*25)+'%'; p.style.transform = `rotate(${rot}deg)`; }
         
         renderLog(); updateRobot();
